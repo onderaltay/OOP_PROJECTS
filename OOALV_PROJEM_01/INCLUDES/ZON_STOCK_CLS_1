@@ -1,0 +1,84 @@
+*&---------------------------------------------------------------------*
+*&  Include           ZON_STOK_CLS_1
+*&---------------------------------------------------------------------*
+
+
+CLASS LCL_MAIN DEFINITION.
+  PUBLIC SECTION.
+
+    METHODS START_SCREEN.
+    METHODS PBO_PAI.
+    METHODS GET_DATA.
+    METHODS GET_FCAT.
+    METHODS DISPLAY_ALV.
+
+ENDCLASS.
+
+CLASS LCL_MAIN IMPLEMENTATION.
+  METHOD START_SCREEN.
+    CALL SCREEN 0100.
+  ENDMETHOD.
+
+  METHOD PBO_PAI.
+
+     SET PF-STATUS '0100'.
+*     SET TITLEBAR 'xxx'.
+   CREATE OBJECT GO_MAIN.
+   GO_MAIN->GET_DATA( ).
+   GO_MAIN->GET_FCAT( ).
+   GO_MAIN->DISPLAY_ALV( ).
+
+
+      CASE SY-UCOMM.
+       WHEN '&BACK'.
+        SET SCREEN 0.
+       ENDCASE.
+
+ENDMETHOD.
+
+  METHOD GET_DATA.
+    SELECT STOCK_ID
+           STOCK_NAME
+           STOCK_QTY
+      FROM ZON_STOK_LIST
+      INTO TABLE GT_TABLE.
+  ENDMETHOD.
+
+
+  METHOD GET_FCAT.
+    CLEAR GS_FCAT.
+    GS_FCAT-FIELDNAME = 'STOCK_ID'.
+    GS_FCAT-COLTEXT   = 'Stock ID'.
+    APPEND GS_FCAT TO GT_FCAT.
+
+    CLEAR GS_FCAT.
+    GS_FCAT-FIELDNAME = 'STOCK_NAME'.
+    GS_FCAT-COLTEXT   = 'Stock Name'.
+    APPEND GS_FCAT TO GT_FCAT.
+
+    CLEAR GS_FCAT.
+    GS_FCAT-FIELDNAME = 'STOCK_QTY'.
+    GS_FCAT-COLTEXT   = 'Stock Quantity'.
+    APPEND GS_FCAT TO GT_FCAT.
+
+  ENDMETHOD.
+
+
+  METHOD DISPLAY_ALV.
+   CREATE OBJECT GO_CONT
+     EXPORTING
+       CONTAINER_NAME              =  'CC1'.
+
+    CREATE OBJECT GO_GRID
+      EXPORTING
+        I_PARENT = GO_CONT.
+
+
+    CALL METHOD GO_GRID->SET_TABLE_FOR_FIRST_DISPLAY
+      CHANGING
+        IT_OUTTAB      = GT_TABLE
+        IT_FIELDCATALOG = GT_FCAT.
+
+  ENDMETHOD.
+
+ENDCLASS.

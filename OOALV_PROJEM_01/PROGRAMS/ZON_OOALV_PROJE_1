@@ -1,0 +1,16 @@
+*&---------------------------------------------------------------------*
+*& Report ZON_OOALV_PROJE_1
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZON_OOALV_PROJE_1.
+
+INCLUDE ZON_STOK_TOP_1.
+INCLUDE ZON_STOK_CLS_1.
+INCLUDE ZON_STOK_MDL_1.
+
+
+
+START-OF-SELECTION.
+CREATE OBJECT GO_MAIN.
+GO_MAIN->START_SCREEN( ).

@@ -1,0 +1,17 @@
+*&---------------------------------------------------------------------*
+*&  Include           ZON_STOK_TOP_1
+*&---------------------------------------------------------------------*
+CLASS LCL_MAIN DEFINITION DEFERRED.
+ TYPES: BEGIN OF GTY_LIST,
+             STOCK_ID   TYPE Z_STOCK_ID,
+             STOCK_NAME TYPE Z_STOCK_NAME,
+             STOCK_QTY  TYPE Z_STOCK_QTY,
+           END OF GTY_LIST.
+
+    DATA: GT_TABLE TYPE TABLE OF GTY_LIST,
+          GS_TABLE TYPE GTY_LIST,
+          GT_FCAT  TYPE LVC_T_FCAT,
+          GS_FCAT  TYPE LVC_S_FCAT.
+    DATA: GO_MAIN TYPE REF TO LCL_MAIN.
+    DATA: GO_GRID TYPE REF TO CL_GUI_ALV_GRID,
+          GO_CONT TYPE REF TO CL_GUI_CUSTOM_CONTAINER.
