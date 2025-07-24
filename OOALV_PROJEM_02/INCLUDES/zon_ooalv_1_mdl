@@ -1,0 +1,26 @@
+*&---------------------------------------------------------------------*
+*& Include          ZON_OOALV_1_FRM
+*&---------------------------------------------------------------------*
+
+MODULE status_0100 OUTPUT.
+  SET PF-STATUS '0100'.
+*  SET TITLEBAR 'xxx'.
+  go_main->get_data( ).
+  go_main->get_fcat( ).
+  go_main->display_alv( ).
+
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0100  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE user_command_0100 INPUT.
+  CASE sy-ucomm.
+    WHEN '&BACK'.
+      SET SCREEN 0.
+    WHEN '&EXCEL'.
+      GO_MAIN->export_to_excel( ).
+  ENDCASE.
+
+ENDMODULE.

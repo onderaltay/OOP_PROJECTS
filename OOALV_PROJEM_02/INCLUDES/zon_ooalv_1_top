@@ -1,0 +1,23 @@
+*&---------------------------------------------------------------------*
+*& Include          ZON_OOALV_1_TOP
+*&---------------------------------------------------------------------*
+
+
+CLASS lcl_main DEFINITION DEFERRED.
+
+TYPES: BEGIN OF gty_list,
+         matnr LIKE mard-matnr,
+         maktx LIKE makt-maktx,
+         labst LIKE mard-labst,
+         stprs LIKE mbew-stprs,
+         lgort LIKE mard-lgort,
+       END OF gty_list.
+
+DATA: gt_table TYPE TABLE OF gty_list,
+      gs_table TYPE gty_list,
+      gt_fcat  TYPE lvc_t_fcat,
+      gs_fcat  TYPE lvc_s_fcat.
+
+DATA: go_main TYPE REF TO lcl_main.
+DATA: go_grid TYPE REF TO cl_gui_alv_grid,
+      go_cont TYPE REF TO cl_gui_custom_container.

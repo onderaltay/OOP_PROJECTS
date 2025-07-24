@@ -1,0 +1,156 @@
+*&---------------------------------------------------------------------*
+*& Include          ZON_OOALV_1_CLS
+*&---------------------------------------------------------------------*
+
+CLASS lcl_main DEFINITION.
+  PUBLIC SECTION.
+
+    METHODS start_screen.
+    METHODS get_data.
+    METHODS get_fcat.
+    METHODS display_alv.
+    METHODS export_to_excel.
+
+ENDCLASS.
+
+CLASS lcl_main IMPLEMENTATION.
+  METHOD start_screen.
+    CALL SCREEN 0100.
+  ENDMETHOD.
+
+
+  METHOD get_data.
+    SELECT mard~matnr
+          makt~maktx
+          mard~labst
+          mbew~stprs
+          mard~lgort
+     INTO TABLE gt_table
+     FROM mard
+     INNER JOIN makt
+       ON mard~matnr = makt~matnr
+     INNER JOIN mbew
+       ON mard~matnr = mbew~matnr
+      AND mard~werks = mbew~bwkey
+      WHERE makt~spras = 'TR'.
+    .
+  ENDMETHOD.
+
+
+  METHOD get_fcat.
+    CLEAR gs_fcat.
+    gs_fcat-fieldname = 'MATNR'.
+    gs_fcat-coltext   = 'Stock ID'.
+    gs_fcat-col_opt   = abap_true.
+    APPEND gs_fcat TO gt_fcat.
+
+    CLEAR gs_fcat.
+    gs_fcat-fieldname = 'MAKTX'.
+    gs_fcat-coltext   = 'Stock Name'.
+    gs_fcat-col_opt   = abap_true.
+    APPEND gs_fcat TO gt_fcat.
+
+    CLEAR gs_fcat.
+    gs_fcat-fieldname = 'LABST'.
+    gs_fcat-coltext   = 'Stock Quantity'.
+    gs_fcat-col_opt   = abap_true.
+    APPEND gs_fcat TO gt_fcat.
+
+    CLEAR gs_fcat.
+    gs_fcat-fieldname = 'STPRS'.
+    gs_fcat-coltext   = 'Stock Cost'.
+    gs_fcat-col_opt   = abap_true.
+    APPEND gs_fcat TO gt_fcat.
+
+    CLEAR gs_fcat.
+    gs_fcat-fieldname = 'LGORT'.
+    gs_fcat-coltext   = 'Stock Location'.
+    gs_fcat-col_opt   = abap_true.
+    APPEND gs_fcat TO gt_fcat.
+
+  ENDMETHOD.
+
+
+  METHOD display_alv.
+    CREATE OBJECT go_cont
+      EXPORTING
+        container_name = 'CC1'.
+
+    CREATE OBJECT go_grid
+      EXPORTING
+        i_parent = go_cont.
+
+
+    CALL METHOD go_grid->set_table_for_first_display
+      CHANGING
+        it_outtab       = gt_table
+        it_fieldcatalog = gt_fcat.
+
+  ENDMETHOD.
+
+  method export_to_excel.
+
+TYPES: BEGIN OF gty_header,
+         line TYPE char50,
+       END OF gty_header.
+
+DATA: gt_header TYPE STANDARD TABLE OF gty_header,
+      gs_header TYPE gty_header.
+
+DATA: lv_path      TYPE string,
+        lv_filename  TYPE string,
+        lv_fullpath  TYPE string.
+
+
+  CALL METHOD cl_gui_frontend_services=>directory_browse
+    CHANGING
+      selected_folder = lv_path
+    EXCEPTIONS
+      OTHERS = 1.
+
+  IF sy-subrc <> 0 OR lv_path IS INITIAL.
+    MESSAGE 'Klasör seçilmedi' TYPE 'S'.
+    RETURN.
+  ENDIF.
+
+
+  CONCATENATE lv_path '/'
+              sy-datum '-' sy-uzeit
+              '.xls'
+         INTO lv_fullpath.
+
+
+  CLEAR gt_header.
+  DEFINE add_header.
+    gs_header-line = &1.
+    APPEND gs_header TO gt_header.
+  END-OF-DEFINITION.
+
+  add_header: 'STOK NUMARASI',
+              'STOK ADI',
+              'STOK ADEDÝ',
+              'STOK MALÝYETÝ',
+              'STOK KONUMU'.
+
+
+  CALL FUNCTION 'GUI_DOWNLOAD'
+    EXPORTING
+      filename              = lv_fullpath
+      filetype              = 'ASC'
+      write_field_separator = 'X'
+    TABLES
+      data_tab              = gt_table
+      fieldnames            = gt_header
+    EXCEPTIONS
+      OTHERS = 1.
+
+  IF sy-subrc = 0.
+    MESSAGE |Excel dosyasý oluþturuldu: { lv_fullpath }| TYPE 'S'.
+  ELSE.
+    MESSAGE 'Excel aktarýmý sýrasýnda hata oluþtu' TYPE 'E'.
+  ENDIF.
+
+ENDMETHOD.
+
+
+ENDCLASS.
